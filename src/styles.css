@@ -110,7 +110,7 @@
 
   .radar-core {
     position: absolute;
-    inset: 8%;
+    inset: 5%;
     border-radius: 9999px;
     background:
       radial-gradient(circle, rgba(83, 245, 170, 0.08) 0 6%, transparent 6% 100%),
@@ -125,8 +125,8 @@
     top: 50%;
     z-index: 3;
     display: grid;
-    width: clamp(190px, 26%, 228px);
-    height: clamp(190px, 26%, 228px);
+    width: clamp(220px, 29%, 270px);
+    height: clamp(220px, 29%, 270px);
     transform: translate(-50%, -50%);
     place-items: center;
     border-radius: 999px;
@@ -148,11 +148,11 @@
   .direction-card {
     position: absolute;
     z-index: 4;
-    min-width: clamp(104px, 14%, 124px);
+    min-width: clamp(112px, 15.5%, 136px);
     border-radius: 14px;
     border: 1px solid rgba(125, 211, 252, 0.15);
     background: rgba(2, 6, 23, 0.8);
-    padding: clamp(8px, 1.3vw, 10px) clamp(9px, 1.4vw, 11px);
+    padding: clamp(9px, 1.5vw, 12px) clamp(10px, 1.6vw, 13px);
     text-align: center;
     backdrop-filter: blur(12px);
   }

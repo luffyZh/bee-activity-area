@@ -20,13 +20,8 @@ function layerToneClass(state: DirectionActivityDetail['layers'][number]['state'
 
 export function RadarDetailDrawer({ details, open, onClose }: RadarDetailDrawerProps) {
   return (
-    <aside
-      className={`h-full overflow-hidden rounded-[20px] border border-slate-700/80 bg-slate-950/88 backdrop-blur transition-all duration-300 ${
-        open ? 'w-[360px] opacity-100' : 'pointer-events-none w-0 border-transparent opacity-0'
-      }`}
-      aria-hidden={!open}
-    >
-      <div className="h-full overflow-auto p-4">
+    <aside className="panel-shell flex h-full min-h-0 flex-col px-4 py-4 md:px-5 md:py-5" aria-hidden={!open}>
+      <div className="mb-3 flex shrink-0 items-center justify-between gap-3">
         <div className="flex items-center justify-between gap-3">
           <div>
             <div className="text-[11px] uppercase tracking-[0.16em] text-slate-400">方向分层详情</div>
@@ -40,8 +35,10 @@ export function RadarDetailDrawer({ details, open, onClose }: RadarDetailDrawerP
             收起
           </button>
         </div>
+      </div>
 
-        <div className="mt-4 grid gap-3">
+      <div className="min-h-0 flex-1 overflow-auto pr-1">
+        <div className="grid gap-3">
           {details.map((item) => (
             <section key={item.direction} className="rounded-[18px] border border-slate-700/70 bg-slate-900/65 p-3.5">
               <div className="flex items-end justify-between gap-3">

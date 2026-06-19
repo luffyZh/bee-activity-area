@@ -1,18 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 
-import { RadarDetailDrawer } from './RadarDetailDrawer'
 import { calcCoveragePoints, pointsToPolygon } from '../lib/dashboard'
-import type { DashboardState, DirectionActivityDetail } from '../types/dashboard'
+import type { DashboardState } from '../types/dashboard'
 
 interface RadarPanelProps {
   state: DashboardState
   detailOpen: boolean
   onToggleDetail: () => void
-  onCloseDetail: () => void
-  details: DirectionActivityDetail[]
 }
-
-const badges = ['风速 2.6 m/s', '光照 41 klx', '温度 28.4 °C']
 
 const heroStats = [
   { key: 'valid', label: 'RGB 确认事件', note: '近场有效停留样本' },
@@ -21,23 +16,38 @@ const heroStats = [
 ] as const
 
 const directionCards = [
-  { key: 'north', label: '北向', note: '花带触达良好', className: 'top-[8%] left-1/2 -translate-x-1/2' },
-  { key: 'east', label: '东向', note: '轨迹密度稳定', className: 'top-1/2 right-[3%] -translate-y-1/2' },
-  { key: 'south', label: '南向', note: '近场有效较强', className: 'bottom-[8%] left-1/2 -translate-x-1/2' },
-  { key: 'west', label: '西向', note: '边界轻微衰减', className: 'top-1/2 left-[3%] -translate-y-1/2' },
+  { key: 'north', label: '北向', note: '花带触达良好', className: 'top-[5%] left-1/2 -translate-x-1/2' },
+  { key: 'east', label: '东向', note: '轨迹密度稳定', className: 'top-1/2 right-[0.5%] -translate-y-1/2' },
+  { key: 'south', label: '南向', note: '近场有效较强', className: 'bottom-[5%] left-1/2 -translate-x-1/2' },
+  { key: 'west', label: '西向', note: '边界轻微衰减', className: 'top-1/2 left-[0.5%] -translate-y-1/2' },
 ] as const
 
 const ringLabels = [
-  { label: '500m', className: 'top-[4%] left-1/2 -translate-x-1/2' },
-  { label: '1000m', className: 'bottom-[12%] left-[7%]' },
-  { label: '2000m', className: 'bottom-[6%] left-[2%]' },
+  { label: '500m', className: 'top-[1.5%] left-1/2 -translate-x-1/2' },
+  { label: '1000m', className: 'bottom-[10%] left-[5%]' },
+  { label: '2000m', className: 'bottom-[3.5%] left-[0.5%]' },
 ]
 
-export function RadarPanel({ state, detailOpen, onToggleDetail, onCloseDetail, details }: RadarPanelProps) {
+type DirectionKey = (typeof directionCards)[number]['key']
+
+const directionColorClasses = ['text-emerald-300', 'text-emerald-300', 'text-amber-300', 'text-rose-400'] as const
+
+function createDirectionColorMap() {
+  const keys = [...directionCards.map((card) => card.key)]
+  const shuffledKeys = keys.sort(() => Math.random() - 0.5)
+
+  return shuffledKeys.reduce<Record<DirectionKey, string>>((accumulator, key, index) => {
+    accumulator[key] = directionColorClasses[index]
+    return accumulator
+  }, {} as Record<DirectionKey, string>)
+}
+
+export function RadarPanel({ state, detailOpen, onToggleDetail }: RadarPanelProps) {
   const points = calcCoveragePoints(state)
   const polygonPoints = pointsToPolygon(points)
   const contentAreaRef = useRef<HTMLDivElement | null>(null)
   const [radarSize, setRadarSize] = useState(0)
+  const [directionColors, setDirectionColors] = useState<Record<DirectionKey, string>>(() => createDirectionColorMap())
 
   useEffect(() => {
     const element = contentAreaRef.current
@@ -47,12 +57,9 @@ export function RadarPanel({ state, detailOpen, onToggleDetail, onCloseDetail, d
     }
 
     const updateRadarSize = () => {
-      const styles = window.getComputedStyle(element)
-      const gap = Number.parseFloat(styles.columnGap || styles.gap || '0')
-      const drawerWidth = detailOpen ? 360 : 0
-      const width = Math.max(element.clientWidth - drawerWidth - gap, 0)
-      const height = element.clientHeight
-      const nextSize = Math.max(Math.min(width, height, 920), 320)
+      const width = element.clientWidth
+      const height = Math.max(element.clientHeight, 0)
+      const nextSize = Math.max(Math.min(width, height, 1080), 420)
       setRadarSize(nextSize)
     }
 
@@ -68,26 +75,25 @@ export function RadarPanel({ state, detailOpen, onToggleDetail, onCloseDetail, d
     }
   }, [detailOpen])
 
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setDirectionColors(createDirectionColorMap())
+    }, 2600)
+
+    return () => window.clearInterval(timer)
+  }, [])
+
   return (
     <section className="panel-shell relative flex h-full min-h-0 flex-col overflow-hidden px-4 py-4 md:px-5 md:py-5">
-      <div className="mb-3 shrink-0 flex items-center justify-between gap-3">
-        <button
-          type="button"
-          onClick={onToggleDetail}
-          className="relative z-10 rounded-full border border-slate-700/80 bg-slate-900/75 px-4 py-2 text-sm text-slate-100 transition hover:border-emerald-300/40 hover:text-white"
-        >
-          {detailOpen ? '收起详情' : '查看详情'}
-        </button>
-        <div className="relative z-10 flex flex-wrap justify-end gap-2">
-          {badges.map((badge) => (
-            <span key={badge} className="mini-pill">
-              {badge}
-            </span>
-          ))}
-        </div>
-      </div>
+      <button
+        type="button"
+        onClick={onToggleDetail}
+        className="absolute right-4 top-4 z-10 rounded-full border border-slate-700/80 bg-slate-900/75 px-4 py-2 text-sm text-slate-100 transition hover:border-emerald-300/40 hover:text-white md:right-5 md:top-5"
+      >
+        {detailOpen ? '收起详情' : '查看详情'}
+      </button>
 
-      <div ref={contentAreaRef} className="flex min-h-0 flex-1 items-center gap-3 overflow-hidden">
+      <div ref={contentAreaRef} className="flex min-h-0 flex-1 items-center justify-center overflow-hidden">
         <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden">
           <div
             className="relative aspect-square shrink-0 transition-[width,height] duration-300"
@@ -161,18 +167,17 @@ export function RadarPanel({ state, detailOpen, onToggleDetail, onCloseDetail, d
 
             {directionCards.map((card) => {
               const value = Math.round(state[card.key])
+              const valueClassName = directionColors[card.key] ?? 'text-emerald-300'
               return (
                 <div key={card.key} className={`direction-card ${card.className}`}>
                   <div className="text-[11px] text-slate-400">{card.label}</div>
-                  <strong className="mt-1 block text-[28px] font-semibold leading-none text-slate-50">{value}m</strong>
+                  <strong className={`mt-1 block text-[28px] font-semibold leading-none ${valueClassName}`}>{value}m</strong>
                   <span className="mt-1 block text-[11px] text-slate-300">{card.note}</span>
                 </div>
               )
             })}
           </div>
         </div>
-
-        <RadarDetailDrawer details={details} open={detailOpen} onClose={onCloseDetail} />
       </div>
 
       <div className="relative z-10 mt-3 shrink-0 grid grid-cols-1 gap-2 md:grid-cols-3">

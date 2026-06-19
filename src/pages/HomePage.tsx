@@ -2,8 +2,9 @@ import { useEffect, useMemo, useState } from 'react'
 
 import { EventModal } from '../components/EventModal'
 import { Panel } from '../components/Panel'
+import { RadarDetailDrawer } from '../components/RadarDetailDrawer'
 import { RadarPanel } from '../components/RadarPanel'
-import { directionActivityDetails, focusInsights } from '../data/mockDashboard'
+import { directionActivityDetails } from '../data/mockDashboard'
 import { useDashboardSimulation } from '../hooks/useDashboardSimulation'
 import type { EventKey } from '../types/dashboard'
 
@@ -38,13 +39,16 @@ export function HomePage() {
   return (
     <>
       <main className="screen-shell">
-        <div className="mx-auto grid h-full max-w-[1800px] grid-cols-1 gap-4 overflow-hidden xl:grid-cols-[minmax(360px,35fr)_minmax(0,65fr)]">
-          <aside className="flex min-h-0 flex-col gap-4">
+        <div
+          className={`mx-auto grid h-full max-w-[1800px] grid-cols-1 gap-4 overflow-hidden ${
+            detailOpen
+              ? 'xl:grid-cols-[minmax(320px,2.5fr)_minmax(0,5fr)_minmax(320px,2.5fr)]'
+              : 'xl:grid-cols-[minmax(360px,3fr)_minmax(0,7fr)]'
+          }`}
+        >
+          <aside className="flex min-h-0 flex-col gap-4 overflow-hidden">
             <section className="shrink-0 rounded-[22px] border border-slate-800/80 bg-slate-950/35 px-6 py-5 shadow-[0_18px_50px_rgba(0,0,0,0.22)]">
-              <div className="text-[12px] uppercase tracking-[0.22em] text-slate-400">
-                DVS 远距轨迹 · RGB 落花确认 · 活跃范围融合判断
-              </div>
-              <h1 className="mt-2 text-[32px] font-extrabold leading-tight tracking-[0.02em] text-slate-50 2xl:text-[38px]">
+              <h1 className="text-[32px] font-extrabold leading-tight tracking-[0.02em] text-slate-50 2xl:text-[38px]">
                 蜜蜂活跃范围监控大屏
               </h1>
             </section>
@@ -63,46 +67,11 @@ export function HomePage() {
                   </div>
                 </div>
                 <p className="mt-3 text-sm leading-6 text-slate-300">{summaryText}</p>
-                <div className="mt-3 grid grid-cols-3 gap-2">
-                  <div className="rounded-2xl border border-slate-700/80 bg-slate-950/55 px-3 py-2.5">
-                    <div className="text-[11px] text-slate-400">DVS</div>
-                    <div className="mt-1 text-xl font-semibold text-slate-50">{state.dvs}</div>
-                  </div>
-                  <div className="rounded-2xl border border-slate-700/80 bg-slate-950/55 px-3 py-2.5">
-                    <div className="text-[11px] text-slate-400">RGB</div>
-                    <div className="mt-1 text-xl font-semibold text-slate-50">{state.rgb.toFixed(1)}%</div>
-                  </div>
-                  <div className="rounded-2xl border border-slate-700/80 bg-slate-950/55 px-3 py-2.5">
-                    <div className="text-[11px] text-slate-400">置信度</div>
-                    <div className="mt-1 text-xl font-semibold text-slate-50">{Math.round(state.confidence)}%</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-3 grid gap-2.5">
-                {focusInsights.map((row) => (
-                  <div
-                    key={row.title}
-                    className="grid grid-cols-[60px_1fr_auto] gap-2.5 rounded-2xl border border-slate-700/80 bg-slate-900/55 px-3 py-3"
-                  >
-                    <div className="pt-0.5 text-xs text-slate-400">{row.title}</div>
-                    <div className="text-xs leading-6 text-slate-300">{row.content}</div>
-                    <div
-                      className={`self-start rounded-full border px-2 py-1 text-[11px] ${
-                        row.tone === 'warn'
-                          ? 'border-amber-200/20 bg-amber-200/10 text-amber-100'
-                          : 'border-emerald-300/20 bg-emerald-300/10 text-emerald-50'
-                      }`}
-                    >
-                      {row.badge}
-                    </div>
-                  </div>
-                ))}
               </div>
             </Panel>
 
             <Panel title="事件证据流" tag="证据链" className="flex min-h-0 flex-1 flex-col">
-              <div className="min-h-0 flex-1 overflow-auto pr-1">
+              <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden pr-1">
                 <div className="grid gap-2.5">
                   {eventFeed.map((item) => (
                     <button
@@ -142,10 +111,18 @@ export function HomePage() {
               state={state}
               detailOpen={detailOpen}
               onToggleDetail={() => setDetailOpen((current) => !current)}
-              onCloseDetail={() => setDetailOpen(false)}
-              details={directionActivityDetails}
             />
           </div>
+
+          {detailOpen ? (
+            <div className="min-h-0 overflow-hidden">
+              <RadarDetailDrawer
+                details={directionActivityDetails}
+                open={detailOpen}
+                onClose={() => setDetailOpen(false)}
+              />
+            </div>
+          ) : null}
         </div>
       </main>
 
